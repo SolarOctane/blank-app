@@ -15,7 +15,7 @@ st.title("My Mid Term Project Dashboard")
     #st.dataframe(df)
 
 # Load dataset (make sure the file is in the same directory or provide full path)
-df = pd.read_csv("encounters.csv")
+df = pd.read_csv("encounters_aor_df.csv")
 st.subheader("Immigration Encounters Dataset")
 st.dataframe(df)
 
@@ -34,36 +34,51 @@ st.dataframe(df.describe())
 #st.subheader("📍 Encounters Count per State")
 #encounter_counts = df['State'].value_counts().reset_index()
 #encounter_counts.columns = ['State', 'Encounters Count']
+
+#Streamlit Title
+st.subheader("Total Encounters by Fiscal Year")
 #st.dataframe(encounter_counts)
+encounters_by_year = df.groupby('Fiscal Year')['Encounter Count'].sum().sort_index()
+# Create bar chart
+fig, ax = plt.subplots(figsize=(10, 6))
+x = encounters_by_year.index.astype(str)  # Ensure labels are strings
+y = encounters_by_year.values
+bars = ax.bar(x, y)
+# Add labels on top of each bar
+for bar in bars:
+    yval = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:,.0f}', ha='center', va='bottom', fontsize=10)
+# Chart styling
+ax.set_title('Total Encounter Count by Fiscal Year')
+ax.set_xlabel('Fiscal Year')
+ax.set_ylabel('Encounter Count')
+ax.tick_params(axis='x', rotation=45)
+ax.grid(axis='y')
+plt.tight_layout()
+# Show the plot in Streamlit
+st.pyplot(fig)
 
-st.subheader("📅 Encounters Count by State, Fiscal Year, and Month")
-encounter_counts = df.groupby(['State', 'Fiscal Year', 'Month (abbv)']).size().reset_index(name='Encounters Count')
-encounter_counts = encounter_counts.sort_values(by=['State', 'Fiscal Year', 'Month'])
-st.dataframe(encounter_counts)
+st.subheader("Total Encounters by Continent")
+encounters_by_continent = df.groupby('Continent')['Encounter Count'].sum().sort_values(ascending=False)
+fig, ax = plt.subplots(figsize=(10, 6))
+x = encounters_by_continent.index.astype(str)  # Ensure labels are strings
+y = encounters_by_continent.values
+bars = ax.bar(x, y)
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:,.0f}', ha='center', va='bottom', fontsize=10)
+    
+plt.title('Total Encounter Count by Continent')
+plt.xlabel('Continents')
+plt.ylabel('Encounter Count')
+plt.tick_params(axis='y', rotation=45)
+plt.tight_layout()
+plt.grid(axis='y')
+st.pyplot(fig)
 
-# Plot bar chart
-st.subheader("📊 Bar Chart of Encounters per State")
-fig = px.bar(encounter_counts, x='State', y='Encounters Count', color='Encounters Count',
-             color_continuous_scale='Blues', title='Number of Encounters by State')
-st.plotly_chart(fig)
 
-# Random Plot
-st.subheader("Plot Data")
-x_column = st.selectbox("Select x-axis column", columns)
-y_column = st.selectbox("Select y-axis column", columns)
 
-if st.button("Generate Plot"):
-    st.line_chart(filtered_df.set_index(x_column)[y_column])
 
-st.subheader("Bar Chart")
-#st.dataframe(df)
-
-# Let user select columns for bar chart
-x_axis = st.selectbox("Select X-axis (categorical):", df.columns)
-y_axis = st.selectbox("Select Y-axis (numerical):", df.columns)
-
-# Plot the bar chart
-st.bar_chart(df.set_index(x_axis)[y_axis])
 
 
 
