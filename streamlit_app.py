@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import plotly.express as px
 import seaborn as sns
+import plotly.graph_objects as go
 
 st.title("My Mid Term Project Dashboard")
 
@@ -87,6 +88,43 @@ st.write(encounters_by_citizenship)
 
 st.markdown("---")
 
+st.subheader("Total Encounters by Continent")
+encounters_by_continent = df.groupby('Continent')['Encounter Count'].sum().sort_values(ascending=False)
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(x=encounters_by_continent.index, y=encounters_by_continent.values, palette='viridis', ax=ax)
+ax.set_title('Total Encounters by Continent')
+ax.set_xlabel('Continent')
+ax.set_ylabel('Total Encounters')
+ax.set_xticklabels(encounters_by_continent.index, rotation=45)
+for index, value in enumerate(encounters_by_continent.values):
+    ax.text(index, value + 50, f'{value:,}', ha='center', va='bottom', fontsize=10)
+plt.tight_layout()
+st.pyplot(fig)
+
+st.markdown("---")
+
+st.subheader("Total Encounters by Fiscal Year with Mean and Median")
+
+# Calculate the mean and median of the Sum of Encounter Count by Fiscal Year. Add interactive table with plotly. Add meand and median results to the table.
+encounters_by_fiscal_year_stats = encounters_by_fiscal_year.copy()
+encounters_by_fiscal_year_stats['Mean'] = encounters_by_fiscal_year_stats['Encounter Count'].mean()
+encounters_by_fiscal_year_stats['Median'] = encounters_by_fiscal_year_stats['Encounter Count'].median()
+import plotly.express as px
+fig = px.bar(encounters_by_fiscal_year_stats, x='Fiscal Year', y='Encounter Count',
+             title='Total Encounters by Fiscal Year with Mean and Median',
+             labels={'Encounter Count': 'Total Encounters'},
+             text='Encounter Count')
+fig.add_scatter(x=encounters_by_fiscal_year_stats['Fiscal Year'], y=encounters_by_fiscal_year_stats['Mean'],
+                mode='lines+markers', name='Mean', line=dict(color='red', dash='dash'))
+fig.add_scatter(x=encounters_by_fiscal_year_stats['Fiscal Year'], y=encounters_by_fiscal_year_stats['Median'],
+                mode='lines+markers', name='Median', line=dict(color='blue', dash='dash'))
+fig.update_layout(yaxis_title='Total Encounters', xaxis_title='Fiscal Year')
+fig.show()
+st.plotly_chart(fig, use_container_width=True)
+
+st.write(encounters_by_fiscal_year_stats)
+
+st.markdown("---")
 
 
 
